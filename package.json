@@ -1,0 +1,12 @@
+{
+  "name": "clearpour-app-store-screenshot-builder",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "preview": "python3 -m http.server 8031",
+    "export": "node scripts/export.mjs"
+  },
+  "dependencies": {
+    "playwright-core": "^1.54.2"
+  }
+}

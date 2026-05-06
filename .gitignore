@@ -1,0 +1,8 @@
+.DS_Store
+node_modules
+
+output/*
+!output/.gitkeep
+
+source/screens/*
+!source/screens/.gitkeep
