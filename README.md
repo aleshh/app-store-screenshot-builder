@@ -44,6 +44,8 @@ Then open:
 http://127.0.0.1:8031/src/
 ```
 
+`pnpm preview` is a long-running local server. It is supposed to stay running until you stop it with `Ctrl+C`.
+
 ## Export
 
 The exporter uses `playwright-core` with a locally installed Chrome-compatible browser on macOS.
