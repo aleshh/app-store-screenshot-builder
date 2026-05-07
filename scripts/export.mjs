@@ -74,7 +74,7 @@ for (let index = 0; index < slides.length; index += 1) {
   `);
 }
 
-const html = `<!doctype html>
+const appStoreHtml = `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -91,6 +91,28 @@ const html = `<!doctype html>
     </section>
   </body>
 </html>`;
+
+function buildWebsiteHtml(markup) {
+  return `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ClearPour Website Screenshot Builder</title>
+    <style>
+      html, body {
+        background: transparent !important;
+      }
+      ${css}
+    </style>
+  </head>
+  <body>
+    <section class="website-gallery">
+      ${markup}
+    </section>
+  </body>
+</html>`;
+}
 
 const browser = await chromium.launch({
   executablePath,
@@ -113,7 +135,7 @@ const page = await browser.newPage({
   deviceScaleFactor: 1
 });
 
-await page.setContent(html, { waitUntil: "load" });
+await page.setContent(appStoreHtml, { waitUntil: "load" });
 await page.waitForFunction(() =>
   Array.from(document.images).every((image) => image.complete)
 );
@@ -126,12 +148,40 @@ for (let index = 0; index < slides.length; index += 1) {
   });
   console.log(`Exported ${slide.output}`);
 
-  const websiteLocator = page.locator(`#website-slide-${index + 1}`);
-  await websiteLocator.screenshot({
+  const websitePage = await browser.newPage({
+    viewport: {
+      width: 1200,
+      height: 2200
+    },
+    deviceScaleFactor: 1
+  });
+
+  await websitePage.setContent(buildWebsiteHtml(websiteMarkupParts[index]), {
+    waitUntil: "load"
+  });
+  await websitePage.waitForFunction(() =>
+    Array.from(document.images).every((image) => image.complete)
+  );
+
+  const websiteLocator = websitePage.locator(`#website-slide-${index + 1}`);
+  const box = await websiteLocator.boundingBox();
+
+  if (!box) {
+    throw new Error(`Could not determine bounds for website slide ${index + 1}`);
+  }
+
+  await websitePage.screenshot({
     path: resolve(websiteOutputDir, slide.output),
-    omitBackground: true
+    omitBackground: true,
+    clip: {
+      x: box.x,
+      y: box.y,
+      width: box.width,
+      height: box.height
+    }
   });
   console.log(`Exported website ${slide.output}`);
+  await websitePage.close();
 }
 
 await browser.close();

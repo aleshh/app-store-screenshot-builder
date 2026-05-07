@@ -10,8 +10,6 @@
   --screen-top: calc(var(--phone-height) * (69 / 2760));
   --screen-width: calc(var(--phone-width) * (1206 / 1350));
   --screen-height: calc(var(--phone-height) * (2622 / 2760));
-  --website-pad-x: 88px;
-  --website-pad-y: 112px;
 }
 
 * {
@@ -145,14 +143,32 @@ body {
 }
 
 .website-panel {
-  width: calc(var(--phone-width) + (var(--website-pad-x) * 2));
-  height: calc(var(--phone-height) + (var(--website-pad-y) * 2));
+  width: var(--phone-width);
+  height: var(--phone-height);
   position: relative;
-  overflow: visible;
+  overflow: hidden;
+  background: transparent;
 }
 
 .website-panel .phone-wrap {
   position: absolute;
-  inset: var(--website-pad-y) var(--website-pad-x);
+  inset: 0;
   margin-top: 0;
+}
+
+.website-panel .phone-shadow {
+  inset: 58px 30px 18px;
+  border-radius: 150px;
+  filter: blur(28px);
+  transform: translateY(18px) scale(0.95);
+}
+
+.website-panel .phone-shadow::before {
+  filter: blur(38px);
+  transform: translateY(14px) scale(0.92);
+}
+
+.website-panel .phone-shadow::after {
+  filter: blur(58px);
+  transform: translateY(28px) scale(0.88);
 }
