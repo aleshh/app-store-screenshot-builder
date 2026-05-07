@@ -9,6 +9,7 @@ const rootDir = resolve(__dirname, "..");
 const srcDir = resolve(rootDir, "src");
 const sourceDir = resolve(rootDir, "source");
 const outputDir = resolve(rootDir, "output");
+const websiteOutputDir = resolve(rootDir, "output-website");
 
 function pngDataUrl(bytes) {
   return `data:image/png;base64,${bytes.toString("base64")}`;
@@ -33,9 +34,11 @@ if (!executablePath) {
 }
 
 await mkdir(outputDir, { recursive: true });
+await mkdir(websiteOutputDir, { recursive: true });
 const css = await readFile(resolve(srcDir, "styles.css"), "utf8");
 const frameUrl = pngDataUrl(await readFile(resolve(sourceDir, "frame", "iphone-frame.png")));
 const slideMarkupParts = [];
+const websiteMarkupParts = [];
 
 for (let index = 0; index < slides.length; index += 1) {
   const slide = slides[index];
@@ -57,6 +60,18 @@ for (let index = 0; index < slides.length; index += 1) {
       </div>
     </section>
   `);
+
+  websiteMarkupParts.push(`
+    <section class="website-panel" id="website-slide-${index + 1}" data-output="${slide.output}">
+      <div class="phone-wrap">
+        <div class="phone-shadow"></div>
+        <div class="phone-stage">
+          <img class="screen-image" src="${screenshotUrl}" alt="${slide.headline}">
+          <img class="frame-image" src="${frameUrl}" alt="">
+        </div>
+      </div>
+    </section>
+  `);
 }
 
 const html = `<!doctype html>
@@ -71,6 +86,9 @@ const html = `<!doctype html>
     <main class="gallery">
       ${slideMarkupParts.join("")}
     </main>
+    <section class="website-gallery" aria-hidden="true">
+      ${websiteMarkupParts.join("")}
+    </section>
   </body>
 </html>`;
 
@@ -107,6 +125,13 @@ for (let index = 0; index < slides.length; index += 1) {
     path: resolve(outputDir, slide.output)
   });
   console.log(`Exported ${slide.output}`);
+
+  const websiteLocator = page.locator(`#website-slide-${index + 1}`);
+  await websiteLocator.screenshot({
+    path: resolve(websiteOutputDir, slide.output),
+    omitBackground: true
+  });
+  console.log(`Exported website ${slide.output}`);
 }
 
 await browser.close();

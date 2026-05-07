@@ -4,5 +4,8 @@ node_modules
 output/*
 !output/.gitkeep
 
+output-website/*
+!output-website/.gitkeep
+
 source/screens/*
 !source/screens/.gitkeep

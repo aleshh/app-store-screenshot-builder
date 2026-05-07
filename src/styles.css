@@ -10,6 +10,8 @@
   --screen-top: calc(var(--phone-height) * (69 / 2760));
   --screen-width: calc(var(--phone-width) * (1206 / 1350));
   --screen-height: calc(var(--phone-height) * (2622 / 2760));
+  --website-pad-x: 88px;
+  --website-pad-y: 112px;
 }
 
 * {
@@ -134,4 +136,23 @@ body {
   height: 100%;
   object-fit: contain;
   pointer-events: none;
+}
+
+.website-gallery {
+  display: grid;
+  gap: 32px;
+  justify-content: center;
+}
+
+.website-panel {
+  width: calc(var(--phone-width) + (var(--website-pad-x) * 2));
+  height: calc(var(--phone-height) + (var(--website-pad-y) * 2));
+  position: relative;
+  overflow: visible;
+}
+
+.website-panel .phone-wrap {
+  position: absolute;
+  inset: var(--website-pad-y) var(--website-pad-x);
+  margin-top: 0;
 }

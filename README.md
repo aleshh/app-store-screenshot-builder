@@ -12,6 +12,8 @@ This folder contains the reusable HTML/CSS compositor for ClearPour's App Store 
   - HTML, CSS, and slide metadata for the composed marketing images
 - `output/`
   - exported App Store-ready images
+- `output-website/`
+  - exported website-ready framed device images without text or colored background
 - `scripts/`
   - local preview and export scripts
 
@@ -23,7 +25,7 @@ Each slide has:
 
 - `image`: the raw screenshot filename in `source/screens/`
 - `headline`: the text shown above the phone
-- `output`: the exported filename written into `output/`
+- `output`: the exported filename written into both `output/` and `output-website/`
 
 ## Replace Screenshots
 
@@ -57,7 +59,10 @@ pnpm install
 pnpm export
 ```
 
-Exports are written to `output/`.
+Exports are written to:
+
+- `output/` for App Store-ready marketing images
+- `output-website/` for plain framed phone images for the website
 
 If the script cannot find Chrome automatically, set `CHROME_PATH`:
 
