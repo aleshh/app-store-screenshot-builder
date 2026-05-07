@@ -89,10 +89,10 @@ const browser = await chromium.launch({
 
 const page = await browser.newPage({
   viewport: {
-    width: 1500,
-    height: 3200
+    width: 1400,
+    height: 3000
   },
-  deviceScaleFactor: 2
+  deviceScaleFactor: 1
 });
 
 await page.setContent(html, { waitUntil: "load" });
