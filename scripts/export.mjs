@@ -36,6 +36,18 @@ if (!executablePath) {
 await mkdir(outputDir, { recursive: true });
 await mkdir(websiteOutputDir, { recursive: true });
 const css = await readFile(resolve(srcDir, "styles.css"), "utf8");
+const fontUrl = `data:font/ttf;base64,${(
+  await readFile(resolve(sourceDir, "fonts", "Fraunces-Variable.ttf"))
+).toString("base64")}`;
+const inlineCss = `
+  @font-face {
+    font-family: "Fraunces Builder";
+    src: url("${fontUrl}") format("truetype");
+    font-weight: 100 900;
+    font-style: normal;
+  }
+  ${css}
+`;
 const frameUrl = pngDataUrl(await readFile(resolve(sourceDir, "frame", "iphone-frame.png")));
 const slideMarkupParts = [];
 const websiteMarkupParts = [];
@@ -80,7 +92,7 @@ const appStoreHtml = `<!doctype html>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>ClearPour App Store Screenshot Builder</title>
-    <style>${css}</style>
+    <style>${inlineCss}</style>
   </head>
   <body>
     <main class="gallery">
@@ -103,7 +115,7 @@ function buildWebsiteHtml(markup) {
       html, body {
         background: transparent !important;
       }
-      ${css}
+      ${inlineCss}
     </style>
   </head>
   <body>

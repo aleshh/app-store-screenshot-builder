@@ -1,3 +1,10 @@
+@font-face {
+  font-family: "Fraunces Builder";
+  src: url("../source/fonts/Fraunces-Variable.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+}
+
 :root {
   --page-bg: #f4eee5;
   --panel-bg: radial-gradient(circle at top, #fffdf7 0%, #f7f1e7 68%, #efe6d7 100%);
@@ -61,10 +68,11 @@ body {
   width: 100%;
   max-width: 1040px;
   text-align: center;
-  font-size: 90px;
+  font-family: "Fraunces Builder", "Fraunces", Georgia, serif;
+  font-size: 120px;
   line-height: 1.01;
-  letter-spacing: -0.06em;
-  font-weight: 700;
+  letter-spacing: normal;
+  font-weight: 400;
   text-wrap: balance;
 }
 
