@@ -1,5 +1,5 @@
-import { mkdir, readFile } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
+import { mkdir, readFile, readdir } from "node:fs/promises";
+import { dirname, extname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright-core";
 import { slides } from "../src/slides.mjs";
@@ -11,8 +11,32 @@ const sourceDir = resolve(rootDir, "source");
 const outputDir = resolve(rootDir, "output");
 const websiteOutputDir = resolve(rootDir, "output-website");
 
-function pngDataUrl(bytes) {
-  return `data:image/png;base64,${bytes.toString("base64")}`;
+const imageMimeTypes = new Map([
+  [".png", "image/png"],
+  [".jpg", "image/jpeg"],
+  [".jpeg", "image/jpeg"],
+  [".webp", "image/webp"]
+]);
+
+function imageDataUrl(filename, bytes) {
+  const mimeType = imageMimeTypes.get(extname(filename).toLowerCase());
+
+  if (!mimeType) {
+    throw new Error(`Unsupported image type: ${filename}`);
+  }
+
+  return `data:${mimeType};base64,${bytes.toString("base64")}`;
+}
+
+async function listScreenImages() {
+  const entries = await readdir(resolve(sourceDir, "screens"), { withFileTypes: true });
+
+  return entries
+    .filter((entry) => entry.isFile())
+    .map((entry) => entry.name)
+    .filter((name) => !name.startsWith("."))
+    .filter((name) => imageMimeTypes.has(extname(name).toLowerCase()))
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 }
 
 function resolveChromeExecutable() {
@@ -48,13 +72,30 @@ const inlineCss = `
   }
   ${css}
 `;
-const frameUrl = pngDataUrl(await readFile(resolve(sourceDir, "frame", "iphone-frame.png")));
+const frameFilename = "iphone-frame.png";
+const frameUrl = imageDataUrl(
+  frameFilename,
+  await readFile(resolve(sourceDir, "frame", frameFilename))
+);
 const slideMarkupParts = [];
 const websiteMarkupParts = [];
+const screenImages = await listScreenImages();
+const slideImageNames = new Set(slides.map((slide) => slide.image));
+const websiteItems = [
+  ...slides,
+  ...screenImages
+    .filter((image) => !slideImageNames.has(image))
+    .map((image) => ({
+      image,
+      headline: "",
+      output: image
+    }))
+];
 
 for (let index = 0; index < slides.length; index += 1) {
   const slide = slides[index];
-  const screenshotUrl = pngDataUrl(
+  const screenshotUrl = imageDataUrl(
+    slide.image,
     await readFile(resolve(sourceDir, "screens", slide.image))
   );
 
@@ -73,12 +114,21 @@ for (let index = 0; index < slides.length; index += 1) {
     </section>
   `);
 
+}
+
+for (let index = 0; index < websiteItems.length; index += 1) {
+  const item = websiteItems[index];
+  const screenshotUrl = imageDataUrl(
+    item.image,
+    await readFile(resolve(sourceDir, "screens", item.image))
+  );
+
   websiteMarkupParts.push(`
-    <section class="website-panel" id="website-slide-${index + 1}" data-output="${slide.output}">
+    <section class="website-panel" id="website-slide-${index + 1}" data-output="${item.output}">
       <div class="phone-wrap">
         <div class="phone-shadow"></div>
         <div class="phone-stage">
-          <img class="screen-image" src="${screenshotUrl}" alt="${slide.headline}">
+          <img class="screen-image" src="${screenshotUrl}" alt="${item.headline}">
           <img class="frame-image" src="${frameUrl}" alt="">
         </div>
       </div>
@@ -159,7 +209,10 @@ for (let index = 0; index < slides.length; index += 1) {
     path: resolve(outputDir, slide.output)
   });
   console.log(`Exported ${slide.output}`);
+}
 
+for (let index = 0; index < websiteItems.length; index += 1) {
+  const item = websiteItems[index];
   const websitePage = await browser.newPage({
     viewport: {
       width: 1200,
@@ -183,7 +236,7 @@ for (let index = 0; index < slides.length; index += 1) {
   }
 
   await websitePage.screenshot({
-    path: resolve(websiteOutputDir, slide.output),
+    path: resolve(websiteOutputDir, item.output),
     omitBackground: true,
     clip: {
       x: box.x,
@@ -192,7 +245,7 @@ for (let index = 0; index < slides.length; index += 1) {
       height: box.height
     }
   });
-  console.log(`Exported website ${slide.output}`);
+  console.log(`Exported website ${item.output}`);
   await websitePage.close();
 }
 

@@ -29,7 +29,15 @@ Each slide has:
 
 ## Replace Screenshots
 
-Drop new raw screenshots into `source/screens/` and update `src/slides.mjs` if filenames change.
+Drop new raw screenshots into `source/screens/`.
+
+The exporter processes every supported image in `source/screens/`:
+
+- Images listed in `src/slides.mjs` export to both `output/` and `output-website/`.
+- Images not listed in `src/slides.mjs` export only to `output-website/`.
+- Unlisted images keep their original filename in `output-website/`.
+
+Update `src/slides.mjs` when an image needs App Store headline artwork.
 
 ## Preview
 
